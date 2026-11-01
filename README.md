@@ -16,7 +16,7 @@
 ```bash
 # 1. Клонировать репозиторий
 git clone https://github.com/Garpalica/Backend-2026.git
-cd Backend-kurbarov-booking
+cd Backend-kurbatov-booking
 
 # 2. Создать и активировать виртуальное окружение
 python -m venv .venv
