@@ -1,39 +1,50 @@
-<!--
-  Это шаблон README проекта. После создания своего репозитория:
-  1. Переименовать репозиторий в backend-<фамилия>-<тема>, например backend-ivanova-library.
-  2. Заполнить разделы ниже под свою тему и удалить этот комментарий.
-  Задания лаб лежат в папке docs/, начинать с docs/README.md.
--->
 
-# Название проекта
 
-Тема №__: **...**. Одна фраза: что это и для кого.
+# Cumpus Booking
 
-| | |
-| --- | --- |
-| Главная сущность | ... |
-| Связанная сущность (1:N) | ... |
-| Фишка | ... |
-| Стек | язык, фреймворк, база данных |
+Тема №9: Переговорные комнаты в офисе и их бронирование. Приложение для онлайн бронирования аудиторий
+
+
+| Главная сущность | Комната |
+| Связанная сущность (1:N) | Бронь |
+| Фишка | загрузка комнат в часах |
+| Стек | python, django, PostgreSQL |
 
 ## Как запустить
 
+
 ```bash
-# команды по порядку: от git clone до работающего сервиса
+# 1. Клонировать репозиторий
+git clone https://github.com/Garpalica/Backend-2026.git
+cd Backend-kurbarov-booking
+
+# 2. Создать и активировать виртуальное окружение
+python -m venv .venv
+.venv\Scripts\activate
+
+# 3. Установить зависимости
+pip install -r requirements.txt
+
+# 4. Применить миграции базы данных
+python manage.py migrate
+
+# 5. Запустить сервер
+python manage.py runserver
 ```
+
 
 Сервис работает на `http://localhost:8000`. Запросы для демонстрации лежат в `requests.http`.
 
 ## Эндпоинты
 
-| Метод | Путь | Что делает | Ответ |
-| --- | --- | --- | --- |
-| GET | `/health` | Проверка, что сервис жив | 200 `{"status":"ok"}` |
-| POST | `/api/items` | Создать | 201 и объект с `id`; 400 при ошибке |
-| GET | `/api/items` | Список | 200 |
-| GET | `/api/items/{id}` | Получить одну запись | 200; 404 |
-| PATCH | `/api/items/{id}` | Изменить | 200; 400; 404 |
-| DELETE | `/api/items/{id}` | Удалить | 204; 404 |
+| Метод | URL | Описание |
+|-------|-----|----------|
+| GET | /health | сервер жив |
+| GET | /api/rooms?limit=&offset=&name=&capacity=&is_booked= | список с пагинацией/фильтром |
+| GET | /api/rooms/{id} | одна комната |
+| POST | /api/rooms | создать (201) |
+| PATCH | /api/rooms/{id} | обновить |
+| DELETE | /api/rooms/{id} | удалить (204) |
 
 ## ER-диаграмма
 
@@ -41,14 +52,18 @@
 
 ```mermaid
 erDiagram
-    parents ||--o{ children : "имеет"
-    parents {
+    rooms ||--o{ bookings : "имеет"
+    rooms {
         int id PK
-        varchar title
+        varchar name
+        int capacity
+        boolean is_booked
     }
-    children {
+    bookings {
         int id PK
-        int parent_id FK
+        int room_id FK
+        datetime start_time
+        datetime end_time
     }
 ```
 
