@@ -33,7 +33,7 @@ python manage.py runserver
 ```
 
 
-Сервис работает на `http://localhost:8000`. Запросы для демонстрации лежат в `requests.http`.
+Сервис работает на `http://localhost:8000`. Запросы для демонстрации лежат в `git_info_about_labs`.
 
 ## Эндпоинты
 
