@@ -10,23 +10,67 @@ GET {{base}}/health/
 ### Список
 GET {{base}}/api/rooms/
 
-### Сломанный JSON, должен быть 400
+### Получить одну запись
 GET {{base}}/api/rooms/1
-Content-Type: application/json
-
-{ "name":
-
-
-
-
-
-
 
 ### Создать
 POST {{base}}/api/rooms/
 Content-Type: application/json
 
-{ "name": "попа", "capacity": 10 }
+{ "name": "D998", "capacity": 10}
+
+
+### Создание уже существующей комнаты ошибка 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "D998", "capacity": 10 }
+
+
+### Неизвестное поле ошибка 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "D998", "capacity": 10 , "people":  10}
+
+
+### Пустое обязательное поле, должен быть 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "", "capacity": 10 }
+
+### Неверное обязательное поле, должен быть 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "B234", "capacity": -1 }
+
+### Отсутствие обязательного поля, должен быть 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "capacity": 10 }
+
+### Сломанный JSON, должен быть 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name":
+
+### Изменить
+PATCH {{base}}/api/rooms/6
+Content-Type: application/json
+
+{ "name": "Изменённая запись","capacity": 2}
+
+### Удалить
+DELETE {{base}}/api/rooms/6
+
+### После удаления должен быть 404
+GET {{base}}/api/rooms/6
+
+
 
 
 
@@ -39,29 +83,7 @@ GET {{base}}/api/rooms/?limit=1&offset=1
 GET {{base}}/api/rooms/?limit=10&offset=0&is_booked=true
 
 
-### Получить одну запись
-GET {{base}}/api/rooms/1
 
-### Изменить
-PATCH {{base}}/api/rooms/6
-Content-Type: application/json
 
-{ "name": "Изменённая запись","capacity": 1}
 
-### Удалить
-DELETE {{base}}/api/rooms/7
 
-### После удаления должен быть 404
-GET {{base}}/api/rooms/1
-
-### Сломанный JSON, должен быть 400
-POST {{base}}/api/rooms/
-Content-Type: application/json
-
-{ "name":
-
-### Пустое обязательное поле, должен быть 400
-POST {{base}}/api/rooms/
-Content-Type: application/json
-
-{ "name": "" }

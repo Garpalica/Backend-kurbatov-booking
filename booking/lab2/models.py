@@ -7,7 +7,7 @@ class Rooms(models.Model):
     class Status(models.IntegerChoices):
         FREE = 0, 'Свободно'
         BOOKED = 1, 'Забронировано'
-    name = models.CharField(max_length=100, null=False)
+    name = models.CharField(max_length=100, null=False, unique=True)
     capacity = models.IntegerField(null=False)
     is_booked = models.IntegerField(choices=Status.choices, default=Status.FREE)
 
