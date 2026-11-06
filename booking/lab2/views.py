@@ -39,8 +39,44 @@ def patch_room(new_room, data):
         new_room.is_booked = data['is_booked']
     new_room.save()
 
-# def parsing_fields_json(data):
+def parsing_query_param(request):
+    limit_param = request.GET.get('limit', 10)
+    offset_param = request.GET.get('offset', 0)
+    name_param = request.GET.get('name', False)
+    capacity_param= request.GET.get('capacity', False)
+    is_booked_param = request.GET.get('is_booked', False)
+    clear_param = {}
+    if name_param:
+        if name_param.strip() == "":
+            raise ValidationError('Параметр name должен быть не пустой строкой', field='name')
+        clear_param['name'] = name_param
+    if capacity_param:
+        try:
+            capacity = int(capacity_param)
+            if capacity >= 100 or capacity <= 0:
+                raise ValidationError('Параметр capacity должен быть >0 и <100', field='queryparam')
+            clear_param['capacity'] = capacity
+        except ValueError:
+            raise ValidationError('Параметр capacity должен быть целым числом', field='queryparam')
+    if is_booked_param:
+        try:
+            is_booked = int(is_booked_param)
+            if is_booked not in (0,1):
+                raise ValidationError('Параметр is_booked должен быть либо 1, либо 0', field='queryparam')
+            clear_param['is_booked'] = is_booked
+        except ValueError:
+            raise ValidationError('Параметр is_booked должен быть целым числом', field='queryparam')
+    try:
+        limit = int(limit_param)
+        offset = int(offset_param)
+        if limit < 0 or offset < 0:
+            raise ValidationError('Параметры limit и offset должны быть не отрицательными', field='queryparam')
+        clear_param['limit'] = limit
+        clear_param['offset'] = offset
+    except ValueError:
+        raise ValidationError('Параметры limit и offset должны быть целыми числами', field='queryparam')
 
+    return clear_param
 
 
 
@@ -51,8 +87,29 @@ def health(request):
 @csrf_exempt
 def rooms(request, id=None):
     if request.method == "GET" and id is None:
-        rooms = list(Rooms.objects.values('id', 'name', 'capacity', 'is_booked'))
-        return JsonResponse(rooms, safe=False ,status=200)
+        all_rooms = Rooms.objects.all()
+        try:
+            query = parsing_query_param(request)
+        except ValidationError as e:
+            return JsonResponse({'error': e.message, 'field': e.field}, status=400)
+
+        if 'name' in query:
+            all_rooms = all_rooms.filter(name__icontains=query['name'])
+        if 'capacity' in query:
+            all_rooms = all_rooms.filter(capacity=query['capacity'])
+        if 'is_booked' in query:
+            all_rooms = all_rooms.filter(is_booked=query['is_booked'])
+        limit = query['limit']
+        offset = query['offset']
+        total = all_rooms.count()
+        paginated_rooms = all_rooms[offset: offset + limit]
+        res = list(paginated_rooms.values('id', 'name','capacity', 'is_booked'))
+        return JsonResponse({
+            'offset': offset,
+            'limit': limit,
+            'total': total,
+            'rooms': res
+        }, status=200)
     elif request.method == "GET" and id is not None:
         try:
             room = Rooms.objects.get(pk=id)

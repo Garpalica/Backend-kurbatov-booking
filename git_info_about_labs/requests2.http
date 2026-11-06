@@ -70,17 +70,14 @@ DELETE {{base}}/api/rooms/6
 ### После удаления должен быть 404
 GET {{base}}/api/rooms/6
 
-
-
-
-
-
 ### Список пагинации
-GET {{base}}/api/rooms/?limit=1&offset=1
-
+GET {{base}}/api/rooms/?limit=10&offset=0
 
 ### Список пагинации c фильтром
-GET {{base}}/api/rooms/?limit=10&offset=0&is_booked=true
+GET {{base}}/api/rooms/?limit=10&offset=0&is_booked=1
+
+### Список пагинации c фильтром
+GET {{base}}/api/rooms/?limit=10&offset=0&is_booked=1&capacity=50
 
 
 
