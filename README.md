@@ -67,6 +67,19 @@ erDiagram
     }
 ```
 
+## Индексы и оптимизация запросов
+
+Для ускорения поиска по названию комнаты (поле `name`) в модели `Rooms` был добавлен индекс (через `db_index=True`).
+
+**Запрос:**
+```sql
+EXPLAIN  SELECT * FROM lab2_rooms WHERE name = 'D998';
+```
+**Результат:**
+Index Scan using lab2_rooms_name_24d00708_like on lab2_rooms  (cost=0.13..8.15 rows=1 width=234)
+Index Cond: ((name)::text = 'D998'::text)
+
+
 ## Интерфейс
 
 <!-- С лабы 4: скриншот, например ![Интерфейс](docs/screenshot.png) -->
