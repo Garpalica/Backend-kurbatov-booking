@@ -7,7 +7,7 @@ class Rooms(models.Model):
     class Status(models.IntegerChoices):
         FREE = 0, 'Свободно'
         BOOKED = 1, 'Забронировано'
-    name = models.CharField(max_length=100, null=False, unique=True)
+    name = models.CharField(max_length=100, null=False, unique=True, db_index=True)
     capacity = models.IntegerField(null=False)
     is_booked = models.IntegerField(choices=Status.choices, default=Status.FREE)
 
@@ -21,9 +21,9 @@ class Rooms(models.Model):
         return self.name
 
 class Bookings(models.Model):
-    room = models.ForeignKey(Rooms, on_delete=PROTECT)
-    start_datetime = models.DateTimeField(null=True, blank=True)
-    end_datetime = models.DateTimeField(null=True, blank=True)
+    room = models.ForeignKey(Rooms, on_delete=PROTECT, related_name='bookings')
+    start_datetime = models.DateTimeField()
+    end_datetime = models.DateTimeField()
 
     def __str__(self):
         return f'Бронь на {self.room.name}'

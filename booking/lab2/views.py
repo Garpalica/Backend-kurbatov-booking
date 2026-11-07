@@ -6,11 +6,12 @@ from django.http import response
 from django.http.response import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 import json
-
+from datetime import datetime
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from psycopg2._psycopg import DatabaseError
 
-from lab2.models import Rooms
+from lab2.models import Rooms, Bookings
 from .validations import (
     BadRequestError,
     ValidationError,
@@ -178,9 +179,10 @@ def rooms(request, id=None):
         return HttpResponse(status=204)
 
 
-
-
-
+@csrf_exempt
+def bookings(request, room_id):
+    if request.method == "GET":
+        room = Rooms.objects.get(pk=room_id)
 
 
 
