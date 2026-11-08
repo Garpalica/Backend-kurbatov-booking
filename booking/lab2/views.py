@@ -1,8 +1,12 @@
 from email import message
 from gc import get_objects
 
+
+from django.db.models import Q, Avg
+from django.db.models.aggregates import Sum, Count
 from django.db.models.enums import ChoicesType
 from django.http import response
+from django.db import transaction
 from django.http.response import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 import json
@@ -10,13 +14,13 @@ from datetime import datetime
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from psycopg2._psycopg import DatabaseError
-
+from zoneinfo import ZoneInfo
 from lab2.models import Rooms, Bookings
 from .validations import (
     BadRequestError,
     ValidationError,
     is_valid_fields_post,
-    is_valid_fields_patch
+    is_valid_fields_patch, is_valid_field_bookings
 )
 
 def get_json(request):
@@ -181,8 +185,85 @@ def rooms(request, id=None):
 
 @csrf_exempt
 def bookings(request, room_id):
+    if room_id <= 0:
+        return JsonResponse({'error': 'Поле room_id должно быть целым числом > 0', 'field': 'room_id' },status=400)
     if request.method == "GET":
-        room = Rooms.objects.get(pk=room_id)
+        try:
+            bookings_rooms = Rooms.objects.get(pk=room_id).bookings.all()
+        except Rooms.DoesNotExist:
+            return JsonResponse({'error': f'Комнаты с таким id: {room_id} не существует', 'field': 'room_id'}, status=400)
+
+        tz = request.GET.get('tz', 'UTC')
+        try:
+            local_tz = ZoneInfo(tz)
+        except Exception:
+            return JsonResponse({'error': f'Зоны с названием: {tz} не существует', 'field': 'tz'}, status=400)
+        res = []
+        for booking in bookings_rooms:
+            local_start = booking.start_datetime.astimezone(local_tz)
+            local_end = booking.end_datetime.astimezone(local_tz)
+
+            res.append({
+                'id': booking.id,
+                'start_datetime': local_start.isoformat(),
+                'end_datetime': local_end.isoformat()
+            })
+        return JsonResponse(res, safe=False, status=200)
+
+    elif request.method == "POST":
+        try:
+            data = get_json(request)
+            start_time,end_time = is_valid_field_bookings(data)
+        except ValidationError as e:
+            return JsonResponse({'error': e.message, 'field': e.field}, status=400)
+        except BadRequestError as e:
+            return JsonResponse({'error': e.message, 'field': e.field}, status=400)
+
+        try:
+            with transaction.atomic():
+
+                room = Rooms.objects.select_for_update().get(pk=room_id)
+
+                conflict = room.bookings.filter(
+                    Q(start_datetime__lt=end_time) & Q(end_datetime__gt=start_time)
+                ).exists()
+
+                if conflict:
+                    return JsonResponse({'error': 'На это время комната уже забронирована','field': 'start_datetime'}, status=409)
+
+                new_booking = Bookings.objects.create(
+                    start_datetime=start_time,
+                    end_datetime=end_time,
+                    room=room
+                )
+
+                room.is_booked = 1
+                room.save()
+            return JsonResponse({
+                'id': new_booking.id,
+                'start_datetime': start_time,
+                'end_datetime': end_time,
+                'room_id': room_id
+            }, status=201)
+
+        except Rooms.DoesNotExist:
+            return JsonResponse({'error': f'Комнаты с таким id: {room_id} не существует', 'field': 'room_id'},status=400)
+        except DatabaseError:
+            return JsonResponse({'error': "Произошла неизвестная ошибка на стороне bd", 'field': 'bd'}, status=500)
+
+
+def stats(request):
+    res = {
+        'Количество комнат': Rooms.objects.count(),
+        'Средняя вместимость комнат': Rooms.objects.aggregate(avg=Avg('capacity'))['avg'],
+        'Общая вместимость всех комнат': Rooms.objects.aggregate(sum=Sum('capacity'))['sum'],
+        'Количество броней на каждую комнату': list(Bookings.objects.values('room_id').annotate(count=Count('id')))
+    }
+    return JsonResponse(res, status=200)
+
+
+
+
 
 
 
