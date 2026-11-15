@@ -1,0 +1,126 @@
+# Запросы для демонстрации. В VS Code нужно расширение REST Client, в JetBrains IDE всё встроено.
+# Над каждым запросом появляется ссылка «Send Request».
+# items заменить на свой ресурс, тела на поля своей сущности.
+
+@base = http://localhost:8000/db
+
+### Сервис жив?
+GET {{base}}/health/
+
+### Список
+GET {{base}}/api/rooms/
+
+### Получить одну запись
+GET {{base}}/api/rooms/1
+
+### Создать
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "D998", "capacity": 10}
+
+
+### Создание уже существующей комнаты ошибка 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "D998", "capacity": 10 }
+
+
+### Неизвестное поле ошибка 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "D998", "capacity": 10 , "people":  10}
+
+
+### Пустое обязательное поле, должен быть 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "", "capacity": 10 }
+
+### Неверное обязательное поле, должен быть 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name": "B234", "capacity": -1 }
+
+### Отсутствие обязательного поля, должен быть 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "capacity": 10 }
+
+### Сломанный JSON, должен быть 400
+POST {{base}}/api/rooms/
+Content-Type: application/json
+
+{ "name":
+
+### Изменить
+PATCH {{base}}/api/rooms/6
+Content-Type: application/json
+
+{ "name": "Изменённая запись","capacity": 2}
+
+### Удалить
+DELETE {{base}}/api/rooms/6
+
+### После удаления должен быть 404
+GET {{base}}/api/rooms/6
+
+### Список пагинации
+GET {{base}}/api/rooms/?limit=10&offset=0
+
+### Список пагинации c фильтром
+GET {{base}}/api/rooms/?limit=10&offset=0&is_booked=1
+
+### Список пагинации c фильтром
+GET {{base}}/api/rooms/?limit=10&offset=0&is_booked=1&capacity=50
+
+### Поиск по названию без учёта регистра
+GET {{base}}/api/rooms/?name=d
+
+### Поиск брони у комнаты 1 по UTC в формате iso
+GET {{base}}/api/rooms/1/bookings/
+
+### Поиск брони у комнаты 1 по Europe/Moscow в формате iso
+GET {{base}}/api/rooms/1/bookings/?tz=Europe/Moscow
+
+
+### Создать бронь на 10 ноября с 12:00 до 14:00 по Москве
+POST {{base}}/api/rooms/1/bookings/
+Content-Type: application/json
+
+{
+    "start_datetime": "2026-11-10T12:00:00+03:00",
+    "end_datetime": "2026-11-10T14:00:00+03:00"
+}
+
+### Забронировать то же время. Сервер должен вернуть 409.
+POST {{base}}/api/rooms/1/bookings/
+Content-Type: application/json
+
+{
+    "start_datetime": "2026-11-10T13:00:00+03:00",
+    "end_datetime": "2026-11-10T15:00:00+03:00"
+}
+
+### Конец раньше начала. Сервер вернет 400.
+POST {{base}}/api/rooms/1/bookings/
+Content-Type: application/json
+
+{
+    "start_datetime": "2026-11-10T14:00:00+03:00",
+    "end_datetime": "2026-11-10T12:00:00+03:00"
+}
+
+
+
+### Статистика
+GET {{base}}/api/rooms/stats/
+
+
+
+
