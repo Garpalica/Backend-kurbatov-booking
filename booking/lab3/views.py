@@ -30,5 +30,12 @@ class RegisterUser(UserModelsMixin,View):
         }, status=201)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class AboutUser(View):
+    def post(self, request):
+        return JsonResponse({
+            'user_id': request.user.id,
+            'user_name': request.user.username
+        }, status= 200)
 
 

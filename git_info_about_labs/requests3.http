@@ -7,12 +7,15 @@
 ### Сервис жив?
 GET {{base}}/health/
 
-### Список
+### Регистрция пользователя
 POST {{base}}/register/
 Content-Type: application/json
 
 { "username": "Андрей", "password1": "1234", "password2": "1234"}
 
-
+### Текущий пользователь Basic Андрей:1234 (0JDQvdC00YDQtdC5OjEyMzQ=). Ошибка на -  Ваня (0JLQsNC90Y8=), Ваня: (0JLQsNC90Y86),  Ваня:5142 (0JLQsNC90Y86NTE0Mg==)
+POST {{base}}/me/
+Content-Type: application/json
+Authorization: Basic 0JDQvdC00YDQtdC5OjEyMzQ=
 
 
