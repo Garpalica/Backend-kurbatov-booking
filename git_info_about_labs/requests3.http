@@ -1,0 +1,18 @@
+# Запросы для демонстрации. В VS Code нужно расширение REST Client, в JetBrains IDE всё встроено.
+# Над каждым запросом появляется ссылка «Send Request».
+# items заменить на свой ресурс, тела на поля своей сущности.
+
+@base = http://localhost:8000/auth
+
+### Сервис жив?
+GET {{base}}/health/
+
+### Список
+POST {{base}}/register/
+Content-Type: application/json
+
+{ "username": "Андрей", "password1": "1234", "password2": "1234"}
+
+
+
+

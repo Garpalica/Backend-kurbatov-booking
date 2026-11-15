@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'lab1.apps.Lab1Config',
     'lab2.apps.Lab2Config',
+    'lab3.apps.Lab3Config',
     'djo'
 ]
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
-
+import json
 from lab2.models import Rooms
 
 
@@ -10,6 +10,19 @@ class BadRequestError(Exception):
         self.message = message
         self.field = field
         super().__init__(self.message)
+
+
+def get_json(request):
+    if request.content_type == 'application/json':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            raise BadRequestError("Неверный формат JSON")
+        return data
+    else:
+        raise BadRequestError("Ожидался формат application/json")
+
+
 
 class ValidationError(BadRequestError):
     pass

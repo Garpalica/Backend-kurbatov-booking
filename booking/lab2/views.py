@@ -20,18 +20,8 @@ from .validations import (
     BadRequestError,
     ValidationError,
     is_valid_fields_post,
-    is_valid_fields_patch, is_valid_field_bookings
+    is_valid_fields_patch, is_valid_field_bookings, get_json
 )
-
-def get_json(request):
-    if request.content_type == 'application/json':
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            raise BadRequestError("Неверный формат JSON")
-        return data
-    else:
-        raise BadRequestError("Ожидался формат application/json")
 
 def patch_room(new_room, data):
     if 'name' in data:
