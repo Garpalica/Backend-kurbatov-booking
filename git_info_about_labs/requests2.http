@@ -11,11 +11,12 @@ GET {{base}}/health/
 GET {{base}}/api/rooms/
 
 ### Получить одну запись
-GET {{base}}/api/rooms/1
+GET {{base}}/api/rooms/3
 
 ### Создать
 POST {{base}}/api/rooms/
 Content-Type: application/json
+Authorization: Basic 0JDQvdC00YDQtdC5OjEyMzQ=
 
 { "name": "D998", "capacity": 10}
 
@@ -65,10 +66,11 @@ Content-Type: application/json
 { "name": "Изменённая запись","capacity": 2}
 
 ### Удалить
-DELETE {{base}}/api/rooms/6
+DELETE {{base}}/api/rooms/5
+Authorization: Basic 0JDQvdC00YDQtdC5OjEyMzQ=
 
 ### После удаления должен быть 404
-GET {{base}}/api/rooms/6
+GET {{base}}/api/rooms/5
 
 ### Список пагинации
 GET {{base}}/api/rooms/?limit=10&offset=0
@@ -83,10 +85,10 @@ GET {{base}}/api/rooms/?limit=10&offset=0&is_booked=1&capacity=50
 GET {{base}}/api/rooms/?name=d
 
 ### Поиск брони у комнаты 1 по UTC в формате iso
-GET {{base}}/api/rooms/1/bookings/
+GET {{base}}/api/rooms/3/bookings/
 
 ### Поиск брони у комнаты 1 по Europe/Moscow в формате iso
-GET {{base}}/api/rooms/1/bookings/?tz=Europe/Moscow
+GET {{base}}/api/rooms/3/bookings/?tz=Europe/Moscow
 
 
 ### Создать бронь на 10 ноября с 12:00 до 14:00 по Москве

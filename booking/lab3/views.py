@@ -20,6 +20,8 @@ class RegisterUser(UserModelsMixin,View):
             username, password = register_allow_fields(data)
             new_user = self.create_user(username=username, password=password)
         except ValidationError as e:
+            if e.message.startswith('Пользователь с именем '):
+                return JsonResponse({'error': e.message, 'field': e.field}, status=409)
             return JsonResponse({'error': e.message, 'field': e.field}, status=400)
         except BadRequestError as e:
             return JsonResponse({'error': e.message, 'field': e.field}, status=400)
@@ -32,7 +34,7 @@ class RegisterUser(UserModelsMixin,View):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AboutUser(View):
-    def post(self, request):
+    def get(self, request):
         return JsonResponse({
             'user_id': request.user.id,
             'user_name': request.user.username

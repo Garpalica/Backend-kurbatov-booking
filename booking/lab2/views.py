@@ -4,6 +4,7 @@ from gc import get_objects
 
 from django.db.models import Q, Avg
 from django.db.models.aggregates import Sum, Count
+from django.db.models.deletion import ProtectedError
 from django.db.models.enums import ChoicesType
 from django.http import response
 from django.db import transaction
@@ -81,6 +82,8 @@ def health(request):
 
 @csrf_exempt
 def rooms(request, id=None):
+    user = request.user
+
     if request.method == "GET" and id is None:
         all_rooms = Rooms.objects.all()
         try:
@@ -98,7 +101,7 @@ def rooms(request, id=None):
         offset = query['offset']
         total = all_rooms.count()
         paginated_rooms = all_rooms[offset: offset + limit]
-        res = list(paginated_rooms.values('id', 'name','capacity', 'is_booked'))
+        res = list(paginated_rooms.values('id', 'name','capacity', 'is_booked', 'owner__username'))
         return JsonResponse({
             'offset': offset,
             'limit': limit,
@@ -114,7 +117,8 @@ def rooms(request, id=None):
             'id': room.id,
             'name': room.name,
             'capacity': room.capacity,
-            'is_booked': room.is_booked
+            'is_booked': room.is_booked,
+            'owner': room.owner.username
         }
         return JsonResponse(res, status=200)
     elif request.method == "POST" and id is None:
@@ -126,7 +130,8 @@ def rooms(request, id=None):
             new_room = Rooms.objects.create(
                 name=data['name'],
                 capacity=data['capacity'],
-                is_booked=data.get('is_booked', Rooms.Status.FREE)
+                is_booked=data.get('is_booked', Rooms.Status.FREE),
+                owner=user
             )
         except ValidationError as e:
             return JsonResponse({'error': e.message, 'field': e.field}, status=400)
@@ -138,7 +143,8 @@ def rooms(request, id=None):
             'id': new_room.id,
             'name': new_room.name,
             'capacity': new_room.capacity,
-            'is_booked': new_room.is_booked
+            'is_booked': new_room.is_booked,
+            'owner': new_room.owner.username
         }
         return JsonResponse(res,status=201)
     elif request.method == "PATCH" and id is not None:
@@ -147,6 +153,8 @@ def rooms(request, id=None):
             is_valid_fields_patch(data)
             try:
                 new_room = Rooms.objects.get(pk=id)
+                if user.pk != new_room.owner_id:
+                    return JsonResponse({'error': 'Запись может быть изменена только создателем', 'field': 'owner'}, status=403)
             except Rooms.DoesNotExist:
                 return JsonResponse({'error': f'Комнаты с id: {id} не найдено', 'field': 'id'}, status=404)
             patch_room(new_room, data)
@@ -160,14 +168,19 @@ def rooms(request, id=None):
             'id': new_room.id,
             'name': new_room.name,
             'capacity': new_room.capacity,
-            'is_booked': new_room.is_booked
+            'is_booked': new_room.is_booked,
+            'owner': new_room.owner.username
         }
         return JsonResponse(res,status=200)
     elif request.method == "DELETE" and id is not None:
         if not (Rooms.objects.filter(pk=id).exists()):
             return JsonResponse({'error': f'Комнаты с таким id: {id} не существует', 'field': 'id'}, status=404)
         try:
+            if user.pk != Rooms.objects.get(pk=id).owner_id:
+                return JsonResponse({'error': 'Запись может быть удалена только создателем', 'field': 'owner'},status=403)
             Rooms.objects.filter(pk=id).delete()
+        except ProtectedError:
+            return JsonResponse({'error': "Комнату нельзя удалить, так как на нее есть запланированные встречи", 'field': 'bd'}, status=409)
         except DatabaseError:
             return JsonResponse({'error': "Произошла неизвестная ошибка на стороне bd", 'field': 'bd'}, status=500)
         return HttpResponse(status=204)

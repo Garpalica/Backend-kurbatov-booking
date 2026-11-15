@@ -31,12 +31,14 @@ class Command(BaseCommand):
             room1 = Rooms.objects.create(
                 name="D734",
                 capacity="30",
-                is_booked=Rooms.Status.FREE
+                is_booked=Rooms.Status.FREE,
+                owner_id = 1 # Сначала создаем root через manage.py и все норм
             )
             room2 = Rooms.objects.create(
                 name="E856",
                 capacity="60",
-                is_booked=Rooms.Status.FREE
+                is_booked=Rooms.Status.FREE,
+                owner_id = 1
             )
             Bookings.objects.create(
                 room=room1,

@@ -13,8 +13,9 @@ class LoginUserMiddleware:
 
     def __call__(self, request):
         allow_urls = ['/auth/me/']
+        allow_method = {'POST', 'DELETE', 'PATCH'}
 
-        if request.path in allow_urls:
+        if request.path in allow_urls or (request.path.startswith('/db/api/') and request.method in allow_method):
             try:
                 data_auth = self.get_auth_data(request)
                 username, password = self.decode(data_auth)

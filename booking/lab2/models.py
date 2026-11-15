@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
 from django.db.models.deletion import PROTECT
@@ -10,6 +11,7 @@ class Rooms(models.Model):
     name = models.CharField(max_length=100, null=False, unique=True, db_index=True)
     capacity = models.IntegerField(null=False)
     is_booked = models.IntegerField(choices=Status.choices, default=Status.FREE)
+    owner = models.ForeignKey(get_user_model(), on_delete=PROTECT, related_name='rooms')
 
     class Meta:
         constraints = [models.CheckConstraint(
