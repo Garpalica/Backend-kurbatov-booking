@@ -17,4 +17,12 @@ Content-Type: application/json
 GET {{base}}/me/
 Authorization: Basic 0JDQvdC00YDQtdC5OjEyMzQ=
 
+### Текущий пользователь Bearer Андрей - 1234 (токен acces)
+GET {{base}}/me/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE3OTQ4MDMxNDIsImlhdCI6MTc5NDc5OTU0Mn0.7NS_CRxublSQnWz1_WdHWCh9pxMzoy3l0eBB311Sh8U
 
+### ef
+POST {{base}}/login/bearer/
+Content-Type: application/json
+
+{ "username": "Андрей", "password": "1234"}

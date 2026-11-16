@@ -23,3 +23,24 @@ def register_allow_fields(data):
         raise BadRequestError('Указаны лишние поля')
 
     return register_validation(data)
+
+
+def login_validation(data):
+    if not isinstance(data['username'], str) or data['username'].strip() == '':
+        raise ValidationError('Поле username должно быть строковым и не пустым', field='username')
+    if not isinstance(data['password'], str) or data['password'].strip() == '':
+        raise ValidationError('Поле password должно быть строковым и не пустым',  field='password')
+    return data['username'], data['password']
+
+def login_allow_fields(data):
+    allow_fields = {'username', 'password'}
+
+    for field in allow_fields:
+        if field not in data:
+            raise BadRequestError('Поля username, password обязательны для регистрации')
+
+    if allow_fields != set(data):
+        raise BadRequestError('Указаны лишние поля')
+
+    return login_validation(data)
+
