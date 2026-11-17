@@ -25,4 +25,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJle
 POST {{base}}/login/bearer/
 Content-Type: application/json
 
-{ "username": "Андрей", "password": "1234"}
+{ "username": "root", "password": "12345"}

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 import os
 
 from django.contrib.auth import authenticate
+from django.core.cache import cache
 from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -48,6 +49,11 @@ class AboutUser(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginUserBearer(View):
     def post(self, request):
+        ip_client = request.META.get('REMOTE_ADDR')
+        attempts = cache.get(ip_client, 0)
+
+        if attempts >= 5:
+            return JsonResponse({'error': 'Слишком много попыток ввода. Попробуйте через минуту'}, status=429)
         try:
             body = get_json(request)
             username, password = login_allow_fields(body)
@@ -55,10 +61,18 @@ class LoginUserBearer(View):
             return JsonResponse({'error': e.message, 'field': e.field}, status=400)
         except BadRequestError as e:
             return JsonResponse({'error': e.message, 'field': e.field}, status=400)
-        user = authenticate(username=username,password=password)
-        if not user:
-            return JsonResponse({'error': 'Пользователь не зарегистрирован', 'field': 'auth'})
+        user = authenticate(request=request, username=username,password=password)
+
+        if user is None:
+            try:
+                cache.incr(ip_client)
+            except ValueError:
+                cache.set(ip_client, 1, timeout=60)
+            return JsonResponse({'error': 'Пользователь не зарегистрирован', 'field': 'auth'}, status=401)
+
+        cache.delete(ip_client)
         token = create_token(user)
+
         return JsonResponse({
             'user_id': user.pk,
             'access_token': token

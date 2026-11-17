@@ -153,7 +153,7 @@ def rooms(request, id=None):
             is_valid_fields_patch(data)
             try:
                 new_room = Rooms.objects.get(pk=id)
-                if user.pk != new_room.owner_id:
+                if user.pk != new_room.owner_id and not user.is_superuser:
                     return JsonResponse({'error': 'Запись может быть изменена только создателем', 'field': 'owner'}, status=403)
             except Rooms.DoesNotExist:
                 return JsonResponse({'error': f'Комнаты с id: {id} не найдено', 'field': 'id'}, status=404)
@@ -176,7 +176,7 @@ def rooms(request, id=None):
         if not (Rooms.objects.filter(pk=id).exists()):
             return JsonResponse({'error': f'Комнаты с таким id: {id} не существует', 'field': 'id'}, status=404)
         try:
-            if user.pk != Rooms.objects.get(pk=id).owner_id:
+            if user.pk != Rooms.objects.get(pk=id).owner_id and not user.is_superuser:
                 return JsonResponse({'error': 'Запись может быть удалена только создателем', 'field': 'owner'},status=403)
             Rooms.objects.filter(pk=id).delete()
         except ProtectedError:
