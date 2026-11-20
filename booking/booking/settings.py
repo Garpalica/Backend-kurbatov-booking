@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-y7!wg7afa099mwoxwwkyh!j%vvno&qsmpz%yosz%m*q*7myqd_'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'lab1.apps.Lab1Config',
     'lab2.apps.Lab2Config',
+    'lab3.apps.Lab3Config',
     'djo'
 ]
 
@@ -53,7 +54,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'lab2.middleware.LogTimeRequestsMiddleware'
+    'lab2.middleware.LogTimeRequestsMiddleware',
+    'lab3.middleware.LoginUserMiddleware'
 ]
 
 ROOT_URLCONF = 'booking.urls'
@@ -140,4 +142,11 @@ MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "local-attempts-caches",
+    }
 }
