@@ -1,0 +1,25 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Привет мир</title>
+</head>
+<body>
+<form id="login-form">
+    <input type="text" id="username" name="username" placeholder="Логин">
+    <input type="password" id="password" name="password" placeholder="Пароль">
+    <button type="submit">Войти</button>
+</form>
+
+    <h1>Список комнат</h1>
+
+    <div id="rooms-container">
+        <p>Загрузка комнат</p>
+    </div>
+
+<script src="{% static 'lab4/js/script.js' %}"></script>
+
+</body>
+</html>
